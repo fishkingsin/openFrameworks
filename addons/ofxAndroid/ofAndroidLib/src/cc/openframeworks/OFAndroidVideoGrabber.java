@@ -74,6 +74,38 @@ public class OFAndroidVideoGrabber extends OFAndroidObject implements Runnable, 
 		return -1;
 	}
 
+	private int findFrontFacingCamera() {
+		int cameraId = -1;
+		// Search for the front facing camera
+		int numberOfCameras = Camera.getNumberOfCameras();
+		for (int i = 0; i < numberOfCameras; i++) {
+			Camera.CameraInfo info = new Camera.CameraInfo();
+			Camera.getCameraInfo(i, info);
+			if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+				cameraId = i;
+				break;
+			}
+		}
+		return cameraId;
+	}
+
+	private int findBackFacingCamera() {
+		int cameraId = -1;
+		//Search for the back facing camera
+		//get the number of cameras
+		int numberOfCameras = Camera.getNumberOfCameras();
+		//for every camera check
+		for (int i = 0; i < numberOfCameras; i++) {
+			Camera.CameraInfo info = new Camera.CameraInfo();
+			Camera.getCameraInfo(i, info);
+			if (info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+				cameraId = i;
+				break;
+			}
+		}
+		return cameraId;
+	}
+
 	public void setDeviceID(int _deviceId){
 		deviceID = _deviceId;
 
@@ -88,8 +120,12 @@ public class OFAndroidVideoGrabber extends OFAndroidObject implements Runnable, 
 			camera.release();
 		}
 
-		if(deviceID==-1)
-			deviceID = getCameraFacing(0);
+		if(deviceID==-1) {
+			deviceID = findBackFacingCamera();
+			if(deviceID==-1) {
+				deviceID = findFrontFacingCamera();
+			}
+		}
 
 		try {
 			if (Build.VERSION.SDK_INT >= 9) {
